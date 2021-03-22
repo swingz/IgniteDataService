@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    					http://www.springframework.org/schema/beans/spring-beans.xsd
+    					http://www.springframework.org/schema/context
+    					http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- 加载配置属性文件 -->
+    <context:property-placeholder
+            ignore-unresolvable="true" location="classpath:database.properties" />
+
+    <bean class="org.springframework.jdbc.datasource.DriverManagerDataSource" id="ds_t1">
+        <property name="driverClassName" value="${jdbc.driver1}"></property>
+        <property name="url" value="${jdbc.url1}"></property>
+        <property name="username" value="${jdbc.username1}"></property>
+        <property name="password" value="${jdbc.password1}"></property>
+    </bean>
+
+    <bean class="org.springframework.jdbc.datasource.DriverManagerDataSource" id="ds_t2">
+        <property name="driverClassName" value="${jdbc.driver2}"></property>
+        <property name="url" value="${jdbc.url2}"></property>
+        <property name="username" value="${jdbc.username2}"></property>
+        <property name="password" value="${jdbc.password2}"></property>
+    </bean>
+
+
+    <bean class="org.apache.ignite.configuration.IgniteConfiguration" id="ignite.cfg">
+        <property name="cacheConfiguration">
+            <list>
+                <!--  加载表T1缓存-->
+                <bean class="org.apache.ignite.configuration.CacheConfiguration">
+                    <property name="name" value="t1Cache"></property>
+                    <property name="readThrough" value="true"></property>
+                    <property name="writeThrough" value="true"></property>
+                    <!-- Set cacheStoreFactory-->
+                    <property name="cacheStoreFactory">
+                        <bean class="javax.cache.configuration.FactoryBuilder" factory-method="factoryOf">
+                            <constructor-arg value="cn.swingz.store.T1Store"></constructor-arg>
+                        </bean>
+                    </property>
+                    <property name="queryEntities">
+                        <list>
+                            <bean class="org.apache.ignite.cache.QueryEntity">
+                                <property name="keyType" value="java.lang.Integer"></property>
+                                <property name="valueType" value="cn.swingz.entities.T1"></property>
+                                <property name="fields">
+                                    <map>
+                                        <entry key="id" value="java.lang.Integer"></entry>
+                                        <entry key="typeName" value="java.lang.String"></entry>
+                                    </map>
+                                </property>
+                            </bean>
+                        </list>
+                    </property>
+                </bean>
+
+                <!--  加载表T3缓存-->
+                <bean class="org.apache.ignite.configuration.CacheConfiguration">
+                    <property name="name" value="t3Cache"></property>
+                    <property name="readThrough" value="true"></property>
+                    <property name="writeThrough" value="true"></property>
+                    <!-- Set cacheStoreFactory-->
+                    <property name="cacheStoreFactory">
+                        <bean class="javax.cache.configuration.FactoryBuilder" factory-method="factoryOf">
+                            <constructor-arg value="cn.swingz.store.T3Store"></constructor-arg>
+                        </bean>
+                    </property>
+                    <property name="queryEntities">
+                        <list>
+                            <bean class="org.apache.ignite.cache.QueryEntity">
+                                <property name="keyType" value="java.lang.String"></property>
+                                <property name="valueType" value="cn.swingz.entities.T3"></property>
+                                <property name="fields">
+                                    <map>
+                                        <entry key="parentId" value="java.lang.Integer"></entry>
+                                        <entry key="key" value="java.lang.String"></entry>
+                                        <entry key="value" value="java.lang.String"></entry>
+                                        <entry key="remarks" value="java.lang.String"></entry>
+                                    </map>
+                                </property>
+                            </bean>
+                        </list>
+                    </property>
+                </bean>
+
+            </list>
+        </property>
+
+
+        <property name="peerClassLoadingEnabled" value="true"></property>
+        <property name="discoverySpi">
+            <bean class="org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi">
+                <property name="joinTimeout" value="200"/>  <!-- 服务端不存就立刻退出-->
+
+                <property name="ipFinder">
+
+                    <bean class="org.apache.ignite.spi.discovery.tcp.ipfinder.multicast.TcpDiscoveryMulticastIpFinder">
+                        <property name="addresses">
+                            <list>
+                                <value>127.0.0.1:47500</value>
+                            </list>
+                        </property>
+                    </bean>
+                </property>
+            </bean>
+        </property>
+
+
+
+    </bean>
+
+
+
+</beans>

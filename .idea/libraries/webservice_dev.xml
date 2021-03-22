@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="webservice-dev">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../webservice/target/webservice-dev.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
